@@ -3,33 +3,41 @@ import { useSelector, useDispatch } from 'react-redux';
 import { removeItem, updateQuantity } from './CreatSlice';
 import './CartItem.css';
 
-const Cart = ({ onContinueShopping }) => {
+const CartItem = ({ onContinueShopping }) => {
   const cart = useSelector(state => state.cart.items);
   const dispatch = useDispatch();
 
   // Calculate total amount for all products in the cart
   const calculateTotalAmount = () => {
- 
+    return cart.reduce((total, item) => {
+      return total + (item.quantity * parseFloat(item.cost.substring(1))); // Assuming cost format like "$15", convert to float
+    }, 0).toFixed(2);
   };
 
   const handleContinueShopping = (e) => {
-   
+    e.preventDefault();
+    onContinueShopping();
   };
 
-
-
   const handleIncrement = (item) => {
+    const updatedQuantity = item.quantity + 1;
+    dispatch(updateQuantity({ name: item.name, quantity: updatedQuantity }));
   };
 
   const handleDecrement = (item) => {
-   
+    if (item.quantity > 1) {
+      const updatedQuantity = item.quantity - 1;
+      dispatch(updateQuantity({ name: item.name, quantity: updatedQuantity }));
+    }
   };
 
   const handleRemove = (item) => {
+    dispatch(removeItem(item.name));
   };
 
   // Calculate total cost based on quantity for an item
   const calculateTotalCost = (item) => {
+    return (item.quantity * parseFloat(item.cost.substring(1))).toFixed(2); // Assuming cost format like "$15", convert to float
   };
 
   return (
@@ -44,7 +52,7 @@ const Cart = ({ onContinueShopping }) => {
               <div className="cart-item-cost">{item.cost}</div>
               <div className="cart-item-quantity">
                 <button className="cart-item-button cart-item-button-dec" onClick={() => handleDecrement(item)}>-</button>
-                <span className="cart-item-quantity-value"></span>
+                <span className="cart-item-quantity-value">{item.quantity}</span>
                 <button className="cart-item-button cart-item-button-inc" onClick={() => handleIncrement(item)}>+</button>
               </div>
               <div className="cart-item-total">Total: ${calculateTotalCost(item)}</div>
@@ -63,6 +71,4 @@ const Cart = ({ onContinueShopping }) => {
   );
 };
 
-export default Cart;
-
-
+export default CartItem;
